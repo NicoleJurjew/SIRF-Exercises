@@ -116,25 +116,25 @@ for i in range(len(prompts_subsets)):
     plt.show()
 
 #%%
-algo_max2 = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_max2 = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
-algo_max30 = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_max30 = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
-algo_nomax = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_nomax = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
 # %%
@@ -171,28 +171,28 @@ plt.show()
 del algo_max2, algo_max30, algo_nomax
 
 #%%
-algo_max2 = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_max2 = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
 #%%
 
-algo_max30 = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_max30 = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
 #%%
-algo_nomax = MLEM(acq_data=prompts_subsets.copy(), 
-            acq_models_act=acquisition_models_B.copy(), 
+algo_nomax = MLEM(acq_data=prompts_subsets, 
+            acq_models_act=acquisition_models_B, 
             initial=emission.get_uniform_copy(1), 
-            const_term=background_subsets.copy(), 
-            det_effs=multi_factors_subsets.copy(), 
+            const_term=background_subsets, 
+            det_effs=multi_factors_subsets, 
             prior_strength=0.1)
 
 # %%

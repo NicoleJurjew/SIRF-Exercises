@@ -65,10 +65,7 @@ class MLEM(__MLAA_step__):
         '''
         '''
         super(MLEM, self).__init__(acq_data, acq_models_act, initial, const_term, det_effs, prior_strength, **kwargs)
-
         self.quotient = [a.clone() for a in acq_data]
-        # att_clone = [a.clone() for a in self.att_factors]
-        # det_effs_clone = [a.clone() for a in self.det_effs]
         self.DE_A = [a.multiply(b) for a, b in zip(self.att_factors, self.det_effs)]
         self.const_term_corr = [c.divide(d) for c, d in zip(self.const_term, self.DE_A)]
 
