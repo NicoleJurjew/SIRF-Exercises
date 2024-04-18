@@ -4,6 +4,13 @@ import sirf.STIR as pet
 import re
 import matplotlib.pyplot as plt
 
+
+from partitioner import data_partition
+from PSMR_MLAAclasses import MLEM
+import copy
+
+pet.AcquisitionData.set_storage_scheme('memory')
+
 #%%
 
 def imshow(image, limits=None, title='', cmap='viridis'):
@@ -47,7 +54,11 @@ def downsample(image, template):
     return zoomed_img
 
 #%%
+forw_proj_name = 'brain_GE_attenuatedForward.hs'
+sino_name_nonTOF = 'GEDis690_maxrd1_sp3_1ring_nonTOF.hs'
 
+
+#%%
 noteb_PET = os.getcwd()
 exersices_path = os.path.abspath(os.path.join(noteb_PET, '..', '..'))
 SIRF_data_path = os.path.abspath(os.path.join(exersices_path, '..', 'SIRF_data'))
@@ -63,7 +74,8 @@ os.chdir(os.path.join(exersices_path, 'working'))
 emission = pet.ImageData(os.path.join(data_path, 'brain_GE_em.hv'))
 attenuation = pet.ImageData(os.path.join(data_path, 'brain_GE_att.hv'))
 
-template_sinogram = pet.AcquisitionData(os.path.join(data_path, 'GEDis690_1ring.hs'))
+proj_data = pet.AcquisitionData(os.path.join(data_path, forw_proj_name))
+template_sino_nonTOF = pet.AcquisitionData(os.path.join(data_path, sino_name_nonTOF))
 
 #%%
 #### display data:
@@ -81,4 +93,134 @@ plt.show()
 
 
 #%%
+#### just test stuff
+bg = proj_data.get_uniform_copy(0)
+multi_factors = proj_data.get_uniform_copy(1)
 
+#%%
+prompts_subsets, \
+    background_subsets, \
+    multi_factors_subsets,\
+    acquisition_models_B, \
+    acquisition_models_B_nonTOF, \
+    acquisition_models_L = data_partition(proj_data, bg, multi_factors, 4, emission.clone(), template_sino_nonTOF, 'staggered', None )
+
+
+#%%
+
+for i in range(len(prompts_subsets)):
+    plt.figure()
+    plot_2d_image([1,3,1], prompts_subsets[i].as_array()[27,47//2,:,:], "Prompts")
+    plot_2d_image([1,3,2], background_subsets[i].as_array()[27,47//2,:,:], "Background")
+    plot_2d_image([1,3,3], multi_factors_subsets[i].as_array()[27,47//2,:,:], "Multiplicative factors")
+    plt.show()
+
+#%%
+algo_max2 = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+algo_max30 = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+algo_nomax = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+# %%
+for i in range(3):
+    algo_nomax.update()
+    algo_max30.update()
+    algo_max2.update()
+    
+    ### change order here and find out if you get the same artifacts to see if it's got to do with copying
+    ### or with the num of max iterations
+    
+
+#%%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_max2.estimates)):
+    plot_2d_image([1,len(algo_max2.estimates),i+1], algo_max2.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("Max 2")
+plt.show()
+
+# %%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_max30.estimates)):
+    plot_2d_image([1,len(algo_max30.estimates),i+1], algo_max30.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("Max 30")
+plt.show()
+# %%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_nomax.estimates)):
+    plot_2d_image([1,len(algo_nomax.estimates),i+1], algo_nomax.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("No max")
+plt.show()
+# %%
+
+acq_clone = [a.clone() for a in prompts_subsets]
+const_term_clone = [c.clone() for c in background_subsets]
+det_effs_clone = [d.clone() for d in multi_factors_subsets]
+
+#%%
+algo_max2 = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+algo_max30 = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+algo_nomax = MLEM(acq_data=prompts_subsets.copy(), 
+            acq_models_act=acquisition_models_B.copy(), 
+            initial=emission.get_uniform_copy(1), 
+            const_term=background_subsets.copy(), 
+            det_effs=multi_factors_subsets.copy(), 
+            prior_strength=0.1)
+
+# %%
+for i in range(3):
+    algo_max30.update()
+    algo_max2.update()
+    algo_nomax.update()
+    
+    ### change order here and find out if you get the same artifacts to see if it's got to do with copying
+    ### or with the num of max iterations
+    
+
+#%%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_max2.estimates)):
+    plot_2d_image([1,len(algo_max2.estimates),i+1], algo_max2.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("Max 2")
+plt.show()
+
+# %%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_max30.estimates)):
+    plot_2d_image([1,len(algo_max30.estimates),i+1], algo_max30.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("Max 30")
+plt.show()
+# %%
+plt.figure(figsize=(12,6))
+for i in range(len(algo_nomax.estimates)):
+    plot_2d_image([1,len(algo_nomax.estimates),i+1], algo_nomax.estimates[i].as_array()[8,:,:], title=f"Iteration {i}")
+plt.title("No max")
+plt.show()
+# %%
