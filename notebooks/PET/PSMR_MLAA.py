@@ -168,9 +168,7 @@ plt.title("No max")
 plt.show()
 # %%
 
-acq_clone = [a.clone() for a in prompts_subsets]
-const_term_clone = [c.clone() for c in background_subsets]
-det_effs_clone = [d.clone() for d in multi_factors_subsets]
+del algo_max2, algo_max30, algo_nomax
 
 #%%
 algo_max2 = MLEM(acq_data=prompts_subsets.copy(), 
@@ -180,6 +178,8 @@ algo_max2 = MLEM(acq_data=prompts_subsets.copy(),
             det_effs=multi_factors_subsets.copy(), 
             prior_strength=0.1)
 
+#%%
+
 algo_max30 = MLEM(acq_data=prompts_subsets.copy(), 
             acq_models_act=acquisition_models_B.copy(), 
             initial=emission.get_uniform_copy(1), 
@@ -187,6 +187,7 @@ algo_max30 = MLEM(acq_data=prompts_subsets.copy(),
             det_effs=multi_factors_subsets.copy(), 
             prior_strength=0.1)
 
+#%%
 algo_nomax = MLEM(acq_data=prompts_subsets.copy(), 
             acq_models_act=acquisition_models_B.copy(), 
             initial=emission.get_uniform_copy(1), 
